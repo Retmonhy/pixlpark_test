@@ -1,22 +1,24 @@
-import { observer } from 'mobx-react-lite';
-import { FC, useState } from 'react';
-import { useEffect } from 'react';
-import '../App.css';
-import { New } from '../components/New';
-import store from '../store';
+import { observer } from "mobx-react-lite";
+import { FC, useState } from "react";
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import "../App.css";
+import { New } from "../components/New";
+import store from "../store";
+import { CurrentNewScreen } from "./CurrentNewScreen";
 
 export const NewsScreen = observer(() => {
   const { news, fetchNews, isLoading } = store.app;
   const [time, setTime] = useState<number>(60);
-  setInterval(() => {
-    setTime((prev) => prev - 1);
-    if (time === 0) {
-      (async () => {
-        await fetchNews();
-        setTime(60);
-      })();
-    }
-  }, 1000);
+  // setInterval(() => {
+  //   setTime((prev) => prev - 1);
+  //   if (time === 0) {
+  //     (async () => {
+  //       await fetchNews();
+  //       setTime(60);
+  //     })();
+  //   }
+  // }, 1000);
 
   useEffect(() => {
     fetchNews();
@@ -27,15 +29,19 @@ export const NewsScreen = observer(() => {
       {isLoading ? (
         <p>Загрузка...</p>
       ) : (
-        <div className="container">
-          <h1 className="news__header">Новости</h1>
-          <RefreshControls time={time} callback={fetchNews} />
-          <div className="news-wrapper">
+        <>
+          <h1 className='news__header'>Новости</h1>
+          {/* <RefreshControls time={time} callback={fetchNews} /> */}
+          <div className='news-wrapper'>
             {news.map((item) => {
-              return <New item={item} key={item.time} />;
+              return (
+                <Link to={`/${item.id}`} relative='path' replace={true}>
+                  <New item={item} key={item.time} />
+                </Link>
+              );
             })}
           </div>
-        </div>
+        </>
       )}
     </div>
   );
@@ -47,9 +53,9 @@ interface IRefreshControls {
 }
 const RefreshControls: FC<IRefreshControls> = ({ time, callback }) => {
   return (
-    <div className="refresh-controls">
+    <div className='refresh-controls'>
       <div>
-        <div className="">
+        <div className=''>
           <p>{`Обновление через: ${time}`}</p>
         </div>
       </div>

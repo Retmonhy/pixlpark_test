@@ -2,4 +2,19 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  border: 0;
+  outline: 0;
+}
+a {
+  text-decoration: none;
+  color: #333;
+  font-family: sans-serif;
+  font-weight: 400;
+}
+a:hover {
+  color: #0075ff;
+}
+a:focus-visible:not(:hover) {
+  outline-offset: 0;
+  color: inherit;
 }
