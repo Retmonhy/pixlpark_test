@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { makeAutoObservable, runInAction } from 'mobx';
 import { api } from '../shared/api/news';
 import { INew } from '../types';
@@ -23,10 +22,12 @@ export class AppStore {
 
       //воткнуть бы стек вызовов сюда чтобы запросы огромным списком не слались
       lastNews.map(async (id) => {
-        const res = await api<INew>(`https://hacker-news.firebaseio.com/v0/item/${id}.json`);
-        runInAction(() => {
-          this.news = [...this.news, res];
-        });
+        const res = await this.fetchOneNew(id);
+        if (res) {
+          runInAction(() => {
+            this.news = [...this.news, res];
+          });
+        }
       });
       this.news = this.sortNews();
 
@@ -38,6 +39,23 @@ export class AppStore {
       runInAction(() => {
         this.isLoading = false;
       });
+    }
+  };
+  fetchOneNew = async (id: number) => {
+    try {
+      runInAction(() => {
+        this.isLoading = true;
+      });
+      const res = await api<INew>(`https://hacker-news.firebaseio.com/v0/item/${id}.json`);
+      runInAction(() => {
+        this.isLoading = false;
+      });
+      return res;
+    } catch (e) {
+      runInAction(() => {
+        this.isLoading = false;
+      });
+      console.error('fetchOneNew ERROR: ', e);
     }
   };
   sortNews = () => {
