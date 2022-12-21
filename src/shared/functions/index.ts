@@ -1,0 +1,1 @@
+export { formateTime } from "./formateTime";

@@ -1,5 +1,6 @@
 import { observer } from "mobx-react-lite";
 import { FC } from "react";
+import { formateTime } from "../shared/functions";
 import { INew } from "../types";
 interface NewProps {
   item: INew;
@@ -15,7 +16,7 @@ export const New: FC<NewProps> = observer(({ item }) => {
         </div>
         <div className='new--info'>
           <span>
-            {item.by} | {Intl.DateTimeFormat().format(item.time)}
+            {item.by} | {formateTime(item.time)}
           </span>
         </div>
       </div>

@@ -3,9 +3,11 @@ import { FC, useState } from "react";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import "../App.css";
+import { Layout } from "../components/Layout";
+import { Loader } from "../components/Loader";
 import { New } from "../components/New";
 import store from "../store";
-import { CurrentNewScreen } from "./CurrentNewScreen";
+import { TargetNewScreen } from "./TargetNewScreen";
 
 export const NewsScreen = observer(() => {
   const { news, fetchNews, isLoading } = store.app;
@@ -25,25 +27,23 @@ export const NewsScreen = observer(() => {
   }, []);
 
   return (
-    <div>
-      {isLoading ? (
-        <p>Загрузка...</p>
-      ) : (
-        <>
-          <h1 className='news__header'>Новости</h1>
-          {/* <RefreshControls time={time} callback={fetchNews} /> */}
-          <div className='news-wrapper'>
-            {news.map((item) => {
-              return (
-                <Link to={`/${item.id}`} relative='path' replace={true}>
-                  <New item={item} key={item.time} />
-                </Link>
-              );
-            })}
-          </div>
-        </>
-      )}
-    </div>
+    <Layout>
+      <h1 className='news__header'>Новости</h1>
+      {/* <RefreshControls time={time} callback={fetchNews} /> */}
+      <div className='news-wrapper'>
+        {isLoading ? (
+          <Loader />
+        ) : (
+          news.map((item) => {
+            return (
+              <Link to={`/${item.id}`} relative='path' replace={true} key={item.time}>
+                <New item={item} />
+              </Link>
+            );
+          })
+        )}
+      </div>
+    </Layout>
   );
 });
 
