@@ -1,7 +1,7 @@
-import { IComment, ITargetNew } from "./../types/index";
-import { makeAutoObservable, runInAction } from "mobx";
-import { api } from "../shared/api/news";
-import { INew } from "../types";
+import { Comment, IComment, ITargetNew } from './../types/index';
+import { makeAutoObservable, runInAction } from 'mobx';
+import { api } from '../shared/api/news';
+import { INew } from '../types';
 
 export class AppStore {
   news: INew[] = [];
@@ -14,23 +14,47 @@ export class AppStore {
       targetNew: true,
     });
   }
+  asyncFunc = (func: () => void) => {
+    return () => {
+      try {
+        runInAction(() => {
+          this.isLoading = true;
+        });
+        func();
+        runInAction(() => {
+          this.isLoading = false;
+        });
+      } catch (error) {
+        console.log('asyncFunc Error = ', error);
+        runInAction(() => {
+          this.isLoading = false;
+        });
+      }
+    };
+  };
+  fetchNews1 = this.asyncFunc(async () => {
+    const response = await api<string[]>('https://hacker-news.firebaseio.com/v0/newstories.json');
+    const lastNews = response.slice(0, 100);
+
+    await Promise.all(lastNews.map((id) => this.fetchOneNew(id))).then((res) => {
+      runInAction(() => {
+        this.news = res as INew[];
+      });
+    });
+    this.news = this.sortNews();
+  });
   fetchNews = async () => {
     try {
       runInAction(() => {
         this.isLoading = true;
-        this.clearNews();
       });
-      const response = await api<string[]>("https://hacker-news.firebaseio.com/v0/newstories.json");
+      const response = await api<string[]>('https://hacker-news.firebaseio.com/v0/newstories.json');
       const lastNews = response.slice(0, 100);
 
-      //воткнуть бы стек вызовов сюда чтобы запросы огромным списком не слались
-      lastNews.map(async (id) => {
-        const res = await this.fetchOneNew(id);
-        if (res) {
-          runInAction(() => {
-            this.news = [...this.news, res];
-          });
-        }
+      await Promise.all(lastNews.map((id) => this.fetchOneNew(id))).then((res) => {
+        runInAction(() => {
+          this.news = res as INew[];
+        });
       });
       this.news = this.sortNews();
 
@@ -38,7 +62,7 @@ export class AppStore {
         this.isLoading = false;
       });
     } catch (e) {
-      console.log("fetchNews Error = ", e);
+      console.log('fetchNews Error = ', e);
       runInAction(() => {
         this.isLoading = false;
       });
@@ -58,17 +82,20 @@ export class AppStore {
       runInAction(() => {
         this.isLoading = false;
       });
-      console.error("fetchOneNew ERROR: ", e);
+      console.error('fetchOneNew ERROR: ', e);
     }
   };
-  fetchComment = async (commentId: string) => {
+  fetchComments = async (commentsId: string[]) => {
     try {
       runInAction(() => {
         this.isLoading = true;
       });
-      if (commentId) {
-        const comment = await api<IComment>(`https://hacker-news.firebaseio.com/v0/item/${commentId}.json`);
-        console.log("comment = ", comment);
+      if (commentsId) {
+        await Promise.all(commentsId.map((id) => api<IComment>(`https://hacker-news.firebaseio.com/v0/item/${id}.json`))).then((res) => {
+          runInAction(() => {
+            this.targetNew = { item: this.targetNew!.item, kids: res.map((item) => new Comment(item)) };
+          });
+        });
       }
       runInAction(() => {
         this.isLoading = false;
@@ -77,7 +104,7 @@ export class AppStore {
       runInAction(() => {
         this.isLoading = false;
       });
-      console.error("fetchComment ERROR: ", error);
+      console.error('fetchComment ERROR: ', error);
     }
   };
   setTargetNew = (item: INew) => {
@@ -87,10 +114,5 @@ export class AppStore {
   };
   sortNews = () => {
     return this.news.slice().sort((a, b) => a.time - b.time);
-  };
-  clearNews = () => {
-    runInAction(() => {
-      this.news = [];
-    });
   };
 }

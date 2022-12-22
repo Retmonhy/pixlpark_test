@@ -19,10 +19,10 @@ export interface IComment {
   type: string;
 }
 export class Comment {
-  id: string;
+  comment: IComment;
   kids: Comment[] = [];
-  constructor(id: string) {
-    this.id = id;
+  constructor(comment: IComment) {
+    this.comment = comment;
   }
 }
 export interface ITargetNew {

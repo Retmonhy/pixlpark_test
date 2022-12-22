@@ -1,16 +1,16 @@
-import { observer } from "mobx-react-lite";
-import { FC, useState } from "react";
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
-import "../App.css";
-import { Layout } from "../components/Layout";
-import { Loader } from "../components/Loader";
-import { New } from "../components/New";
-import store from "../store";
-import { TargetNewScreen } from "./TargetNewScreen";
+import { observer } from 'mobx-react-lite';
+import { FC, memo, useState } from 'react';
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import '../App.css';
+import { Layout } from '../components/Layout';
+import { Loader } from '../components/Loader';
+import { New } from '../components/New';
+import store from '../store';
+import { TargetNewScreen } from './TargetNewScreen';
 
 export const NewsScreen = observer(() => {
-  const { news, fetchNews, isLoading } = store.app;
+  const { news, fetchNews1, isLoading } = store.app;
   const [time, setTime] = useState<number>(60);
   // setInterval(() => {
   //   setTime((prev) => prev - 1);
@@ -23,20 +23,20 @@ export const NewsScreen = observer(() => {
   // }, 1000);
 
   useEffect(() => {
-    fetchNews();
+    !isLoading && fetchNews1();
   }, []);
-
+  console.log('isLoading = ', isLoading);
   return (
     <Layout>
-      <h1 className='news__header'>Новости</h1>
+      <h1 className="news__header">Новости</h1>
       {/* <RefreshControls time={time} callback={fetchNews} /> */}
-      <div className='news-wrapper'>
+      <div className="news-wrapper">
         {isLoading ? (
           <Loader />
         ) : (
           news.map((item) => {
             return (
-              <Link to={`/${item.id}`} relative='path' replace={true} key={item.time}>
+              <Link to={`/${item.id}`} relative="path" replace={true} key={item.time}>
                 <New item={item} />
               </Link>
             );
@@ -53,9 +53,9 @@ interface IRefreshControls {
 }
 const RefreshControls: FC<IRefreshControls> = ({ time, callback }) => {
   return (
-    <div className='refresh-controls'>
+    <div className="refresh-controls">
       <div>
-        <div className=''>
+        <div className="">
           <p>{`Обновление через: ${time}`}</p>
         </div>
       </div>
