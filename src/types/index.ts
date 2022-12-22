@@ -2,7 +2,7 @@ export interface INew {
   id: string;
   by: string;
   descendants: number;
-  kids: string[];
+  kids?: string[];
   score: number;
   time: number;
   title: string;
@@ -12,7 +12,7 @@ export interface INew {
 export interface IComment {
   id: string;
   by: string;
-  kids: string[];
+  kids?: string[];
   parent: string;
   text: string;
   time: number;
@@ -28,4 +28,9 @@ export class Comment {
 export interface ITargetNew {
   item: INew;
   kids: Comment[];
+}
+
+export interface IFindTreeeResult {
+  parent: Comment | null;
+  comment: IComment | null;
 }

@@ -1,42 +1,55 @@
-import { observer } from 'mobx-react-lite';
-import { FC, memo, useState } from 'react';
-import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import '../App.css';
-import { Layout } from '../components/Layout';
-import { Loader } from '../components/Loader';
-import { New } from '../components/New';
-import store from '../store';
-import { TargetNewScreen } from './TargetNewScreen';
+import { toJS } from "mobx";
+import { observer } from "mobx-react-lite";
+import { FC, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import "../App.css";
+import { Layout, Loader, New } from "../components";
+import store from "../store";
+
+const timerValue = 60;
 
 export const NewsScreen = observer(() => {
-  const { news, fetchNews1, isLoading } = store.app;
-  const [time, setTime] = useState<number>(60);
-  // setInterval(() => {
-  //   setTime((prev) => prev - 1);
-  //   if (time === 0) {
-  //     (async () => {
-  //       await fetchNews();
-  //       setTime(60);
-  //     })();
-  //   }
-  // }, 1000);
+  const { news, fetchNews, isLoading } = store.app;
+  const [time, setTime] = useState<number>(timerValue);
 
   useEffect(() => {
-    !isLoading && fetchNews1();
+    fetchNews().then(() => {
+      setTime(timerValue);
+    });
   }, []);
-  console.log('isLoading = ', isLoading);
+  useEffect(() => {
+    if (time === 0 && !isLoading) {
+      (async () => {
+        await fetchNews();
+        setTime(timerValue);
+      })();
+    }
+    const timeInterval = setInterval(() => {
+      setTime((prev) => (prev > 0 ? prev - 1 : prev));
+    }, 1000);
+    return () => {
+      clearInterval(timeInterval);
+    };
+  }, [time]);
+  const refreshControlCb = async () => {
+    await fetchNews();
+    setTime(timerValue);
+  };
+  console.log(
+    "news = ",
+    toJS(news).filter((i) => i.kids?.length! > 3)
+  );
   return (
     <Layout>
-      <h1 className="news__header">Новости</h1>
-      {/* <RefreshControls time={time} callback={fetchNews} /> */}
-      <div className="news-wrapper">
+      <h1 className='news__header'>Новости</h1>
+      <RefreshControls time={time} callback={refreshControlCb} />
+      <div className='news-wrapper'>
         {isLoading ? (
           <Loader />
         ) : (
           news.map((item) => {
             return (
-              <Link to={`/${item.id}`} relative="path" replace={true} key={item.time}>
+              <Link to={`/${item.id}`} relative='path' replace={true} key={toJS(item).url}>
                 <New item={item} />
               </Link>
             );
@@ -53,14 +66,16 @@ interface IRefreshControls {
 }
 const RefreshControls: FC<IRefreshControls> = ({ time, callback }) => {
   return (
-    <div className="refresh-controls">
+    <div className='refresh-controls'>
       <div>
-        <div className="">
+        <div className=''>
           <p>{`Обновление через: ${time}`}</p>
         </div>
       </div>
       <div>
-        <button onClick={callback}>Обновить</button>
+        <button className='btn' onClick={callback}>
+          Обновить
+        </button>
       </div>
     </div>
   );

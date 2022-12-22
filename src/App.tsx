@@ -4,9 +4,7 @@ import { useEffect } from "react";
 import { BrowserRouter, Route, Router, Routes } from "react-router-dom";
 import "./App.css";
 import { New } from "./components/New";
-import { TargetNewScreen } from "./screens/TargetNewScreen";
-import { NewsScreen } from "./screens/NewScreen";
-import store from "./store";
+import { TargetNewScreen, NewsScreen } from "./screens";
 
 export const App = observer(() => {
   return (
