@@ -1,10 +1,10 @@
-import { toJS } from "mobx";
-import { observer } from "mobx-react-lite";
-import { FC, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import "../App.css";
-import { Layout, Loader, New } from "../components";
-import store from "../store";
+import { toJS } from 'mobx';
+import { observer } from 'mobx-react-lite';
+import { FC, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import '../App.css';
+import { Button, Layout, Loader, New } from '../components';
+import store from '../store';
 
 const timerValue = 60;
 
@@ -36,20 +36,20 @@ export const NewsScreen = observer(() => {
     setTime(timerValue);
   };
   console.log(
-    "news = ",
+    'news = ',
     toJS(news).filter((i) => i.kids?.length! > 3)
   );
   return (
     <Layout>
-      <h1 className='news__header'>Новости</h1>
+      <h1 className="news__header">Новости</h1>
       <RefreshControls time={time} callback={refreshControlCb} />
-      <div className='news-wrapper'>
+      <div className="news-wrapper">
         {isLoading ? (
           <Loader />
         ) : (
           news.map((item) => {
             return (
-              <Link to={`/${item.id}`} relative='path' replace={true} key={toJS(item).url}>
+              <Link to={`/${item.id}`} relative="path" replace={true} key={toJS(item).url}>
                 <New item={item} />
               </Link>
             );
@@ -66,16 +66,14 @@ interface IRefreshControls {
 }
 const RefreshControls: FC<IRefreshControls> = ({ time, callback }) => {
   return (
-    <div className='refresh-controls'>
+    <div className="refresh-controls">
       <div>
-        <div className=''>
+        <div className="">
           <p>{`Обновление через: ${time}`}</p>
         </div>
       </div>
       <div>
-        <button className='btn' onClick={callback}>
-          Обновить
-        </button>
+        <Button onClick={callback} title="Обновить" />
       </div>
     </div>
   );

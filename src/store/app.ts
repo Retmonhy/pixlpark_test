@@ -1,7 +1,7 @@
-import { Comment, IComment, IFindTreeeResult, ITargetNew } from "./../types/index";
-import { makeAutoObservable, runInAction, toJS } from "mobx";
-import { api } from "../shared/api/news";
-import { INew } from "../types";
+import { Comment, IComment, IFindTreeeResult, ITargetNew } from './../types/index';
+import { makeAutoObservable, runInAction, toJS } from 'mobx';
+import { api } from '../shared/api/news';
+import { INew } from '../types';
 
 export class AppStore {
   news: INew[] = [];
@@ -25,23 +25,21 @@ export class AppStore {
       runInAction(() => {
         this.isLoading = true;
       });
-      const response = await api<string[]>("https://hacker-news.firebaseio.com/v0/newstories.json");
+      const response = await api<string[]>('https://hacker-news.firebaseio.com/v0/newstories.json');
       const lastNews = response.slice(0, 100);
 
-      await Promise.all(lastNews.map((id) => api<INew>(`https://hacker-news.firebaseio.com/v0/item/${id}.json`))).then(
-        (res) => {
-          runInAction(() => {
-            this.news = res as INew[];
-          });
-        }
-      );
+      await Promise.all(lastNews.map((id) => api<INew>(`https://hacker-news.firebaseio.com/v0/item/${id}.json`))).then((res) => {
+        runInAction(() => {
+          this.news = res as INew[];
+        });
+      });
       this.news = this.sortNews();
 
       runInAction(() => {
         this.isLoading = false;
       });
     } catch (e) {
-      console.log("fetchNews Error = ", e);
+      console.log('fetchNews Error = ', e);
       runInAction(() => {
         this.isLoading = false;
       });
@@ -61,7 +59,7 @@ export class AppStore {
       runInAction(() => {
         this.isLoading = false;
       });
-      console.error("fetchOneNew ERROR: ", e);
+      console.error('fetchOneNew ERROR: ', e);
     }
   };
   fetchComments = async (commentsId: string[]) => {
@@ -70,9 +68,7 @@ export class AppStore {
         this.isLoading = true;
       });
       if (commentsId) {
-        await Promise.all(
-          commentsId.map((id) => api<IComment>(`https://hacker-news.firebaseio.com/v0/item/${id}.json`))
-        ).then((res) => {
+        await Promise.all(commentsId.map((id) => api<IComment>(`https://hacker-news.firebaseio.com/v0/item/${id}.json`))).then((res) => {
           runInAction(() => {
             this.targetNew = { item: this.targetNew!.item, kids: res.map((item) => new Comment(item)) };
           });
@@ -87,7 +83,7 @@ export class AppStore {
       runInAction(() => {
         this.isLoading = false;
       });
-      console.error("fetchComment ERROR: ", error);
+      console.error('fetchComment ERROR: ', error);
     }
   };
   fetchDautherComments = async (parentId: string, commentsId: string[]) => {
@@ -96,15 +92,10 @@ export class AppStore {
         this.isLoading = true;
       });
       if (commentsId) {
-        await Promise.all(
-          commentsId.map((id) => api<IComment>(`https://hacker-news.firebaseio.com/v0/item/${id}.json`))
-        ).then((res) => {
+        await Promise.all(commentsId.map((id) => api<IComment>(`https://hacker-news.firebaseio.com/v0/item/${id}.json`))).then((res) => {
           runInAction(() => {
             const qwer = this.findTree(parentId, this.targetNew?.kids || []);
             if (!qwer.parent) {
-              // this.targetNew?.kids
-              //   .find((i) => i.comment.id === parentId)
-              //   ?.kids.push(...res.map((item) => new Comment(item)));
               this.targetNew = {
                 item: this.targetNew?.item as INew,
                 kids:
@@ -116,10 +107,14 @@ export class AppStore {
                   }) || [],
               };
             } else {
-              qwer.parent.kids.push(...res.map((item) => new Comment(item)));
+              qwer.parent.kids.map((i) => {
+                if (i.comment.id === qwer.comment?.id) {
+                  return { comment: i.comment, kids: res.map((item) => new Comment(item)) };
+                }
+                return i;
+              });
             }
           });
-          console.log("this.targerNew = ", toJS(this.targetNew));
         });
       }
       runInAction(() => {
@@ -129,7 +124,7 @@ export class AppStore {
       runInAction(() => {
         this.isLoading = false;
       });
-      console.error("fetchComment ERROR: ", error);
+      console.error('fetchComment ERROR: ', error);
     }
   };
   setTargetNew = (item: INew) => {

@@ -1,5 +1,6 @@
-import { FC, ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { FC, ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from './Button';
 
 interface ILayoutProps {
   goBack?: boolean;
@@ -9,15 +10,11 @@ export const Layout: FC<ILayoutProps> = ({ goBack, children }) => {
   const navigate = useNavigate();
   return (
     <>
-      <header className='site-header'>
-        {goBack ? (
-          <button className='btn' onClick={() => navigate("..")}>
-            &#129120; Назад
-          </button>
-        ) : null}
-        <p className='absolute-header site-header--header'>Новостной сайт</p>
+      <header className="site-header">
+        {goBack ? <Button title="&#129120; Назад" onClick={() => navigate('..')} /> : null}
+        <p className="absolute-header site-header--header">Новостной сайт</p>
       </header>
-      <div className='container'>{children}</div>
+      <div className="container">{children}</div>
     </>
   );
 };
